@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PortfolioForge — Generador de Portafolios Profesionales</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Source+Code+Pro:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700;800&family=Merriweather:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#06060b;--surface:#0e0e18;--card:#141422;--border:#1c1c30;--accent:#10b981;--accent2:#059669;--text:#e2e8f0;--muted:#64748b;--danger:#ef4444}
+*{margin:0;padding:0;box-sizing:border-box;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh}
+.glow{box-shadow:0 0 30px rgba(16,185,129,0.08)}
+.glow-border{border:1px solid rgba(16,185,129,0.2)}
+.input-field{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:13px;width:100%;transition:all .2s;font-family:'Inter',sans-serif}
+.input-field:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(16,185,129,0.1)}
+.input-field::placeholder{color:var(--muted)}
+textarea.input-field{resize:vertical;min-height:70px}
+.label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px;display:block}
+.btn-primary{background:var(--accent);color:#000;font-weight:600;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-size:13px;transition:all .2s;font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:8px}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(16,185,129,0.3)}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;transition:all .2s;font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:6px}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-icon{background:var(--surface);border:1px solid var(--border);color:var(--muted);width:36px;height:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:14px}
+.btn-icon:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid rgba(239,68,68,0.3);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .2s;font-family:'Inter',sans-serif}
+.btn-danger:hover{background:rgba(239,68,68,0.1);border-color:var(--danger)}
+.section-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px;transition:all .3s}
+.section-card.active{border-color:rgba(16,185,129,0.3);box-shadow:0 0 20px rgba(16,185,129,0.05)}
+.section-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:4px 0;user-select:none}
+.section-header h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px}
+.section-header .chevron{transition:transform .3s;color:var(--muted);font-size:12px}
+.section-card.active .chevron{transform:rotate(180deg)}
+.section-body{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s;padding:0}
+.section-card.active .section-body{max-height:2000px;padding-top:16px}
+.toggle-switch{position:relative;width:40px;height:22px;cursor:pointer}
+.toggle-switch input{display:none}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:11px;transition:.3s}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:.3s}
+.toggle-switch input:checked+.toggle-slider{background:var(--accent)}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(18px);background:#fff}
+.color-swatch{width:32px;height:32px;border-radius:8px;border:2px solid var(--border);cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.color-swatch:hover{transform:scale(1.1);border-color:var(--accent)}
+.color-swatch input{position:absolute;inset:-8px;opacity:0;cursor:pointer}
+.font-option{padding:10px 14px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s;text-align:center}
+.font-option:hover,.font-option.active{border-color:var(--accent);background:rgba(16,185,129,0.05)}
+.template-card{border:2px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .3s;position:relative}
+.template-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.3)}
+.template-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 8px 30px rgba(16,185,129,0.15)}
+.template-card .badge{position:absolute;top:8px;right:8px;background:var(--accent);color:#000;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;display:none}
+.template-card.active .badge{display:block}
+.preview-frame{background:#1a1a2e;border-radius:4px;overflow:hidden;transition:all .4s ease}
+.device-btn{padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:13px;transition:all .2s}
+.device-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:100;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .3s}
+.modal-overlay.show{display:flex;opacity:1}
+.modal-content{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:560px;width:90%;max-height:85vh;overflow-y:auto;transform:scale(0.95);transition:transform .3s}
+.modal-overlay.show .modal-content{transform:scale(1)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 20px;z-index:200;display:flex;align-items:center;gap:10px;font-size:13px;transform:translateY(100px);opacity:0;transition:all .4s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:rgba(16,185,129,0.4)}
+.toast.error{border-color:rgba(239,68,68,0.4)}
+.progress-ring{width:48px;height:48px;transform:rotate(-90deg)}
+.progress-ring circle{fill:none;stroke-width:4;stroke-linecap:round}
+.score-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.score-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .6s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .4s ease forwards}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 15px rgba(16,185,129,0.1)}50%{box-shadow:0 0 25px rgba(16,185,129,0.2)}}
+.export-option{border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .3s}
+.export-option:hover{border-color:var(--accent);background:rgba(16,185,129,0.03);transform:translateY(-2px)}
+.export-option i{font-size:28px;color:var(--accent);margin-bottom:8px}
+.bg-pattern{background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,0.03) 1px,transparent 0);background-size:32px 32px}
+/* Estilos del portafolio dentro del preview */
+.portfolio-page{width:210mm;min-height:297mm;background:#fff;color:#1a1a2e;font-size:10pt;line-height:1.5;position:relative;overflow:hidden}
+.portfolio-page *{box-sizing:border-box}
+</style>
+</head>
+<body class="bg-pattern">
+
+<!-- BARRA SUPERIOR -->
+<header class="fixed top-0 left-0 right-0 h-14 bg-[var(--surface)] border-b border-[var(--border)] z-50 flex items-center justify-between px-5">
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 rounded-lg bg-[var(--accent)] flex items-center justify-center"><i class="fa-solid fa-gem text-black text-sm"></i></div>
+    <span class="font-bold text-sm tracking-wide">PortfolioForge</span>
+    <span class="text-[10px] text-[var(--muted)] bg-[var(--card)] px-2 py-0.5 rounded-full border border-[var(--border)] ml-1">PRO</span>
+  </div>
+  <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2 mr-4">
+      <div class="progress-ring" id="scoreRing">
+        <circle cx="24" cy="24" r="20" stroke="var(--border)"/>
+        <circle cx="24" cy="24" r="20" stroke="var(--accent)" stroke-dasharray="125.6" stroke-dashoffset="125.6" id="scoreCircle"/>
+      </div>
+      <div>
+        <div class="text-xs font-bold" id="scoreText">0%</div>
+        <div class="text-[10px] text-[var(--muted)]">Completado</div>
+      </div>
+    </div>
+    <button class="btn-ghost text-xs" onclick="saveToLocal()"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+    <button class="btn-ghost text-xs" onclick="loadFromLocal()"><i class="fa-solid fa-rotate-left"></i> Restaurar</button>
+    <button class="btn-primary text-xs" onclick="openExportModal()"><i class="fa-solid fa-download"></i> Exportar</button>
+  </div>
+</header>
+
+<!-- LAYOUT PRINCIPAL -->
+<div class="flex pt-14" style="height:100vh">
+
+  <!-- PANEL IZQUIERDO - EDITOR -->
+  <aside class="w-[420px] min-w-[420px] border-r border-[var(--border)] overflow-y-auto p-4" style="height:calc(100vh - 56px)" id="editorPanel">
+
+    <!-- Selector de plantilla -->
+    <div class="mb-4">
+      <button class="w-full section-card active" onclick="openTemplateModal()" style="margin-bottom:0;padding:14px 20px">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-[var(--surface)] flex items-center justify-center"><i class="fa-solid fa-swatchbook text-[var(--accent)]"></i></div>
+            <div class="text-left">
+              <div class="text-sm font-semibold">Plantilla: <span id="currentTemplateName">Minimal</span></div>
+              <div class="text-[11px] text-[var(--muted)]">Haz clic para cambiar</div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-[var(--muted)] text-xs"></i>
+        </div>
+      </button>
+    </div>
+
+    <!-- Sección: Datos Personales -->
+    <div class="section-card active" data-section="personal">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3><i class="fa-solid fa-user text-[var(--accent)] text-xs"></i> Datos Personales</h3>
+        <i class="fa-solid fa-chevron-down chevron"></i>
+      </div>
+      <div class="section-body">
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div><label class="label">Nombre</label><input class="input-field" data-field="personal.nombre" placeholder="Juan"></div>
+          <div><label class="label">Apellido</label><input class="input-field" data-field="personal.apellido" placeholder="Pérez"></div>
+        </div>
+        <div class="mb-3"><label class="label">Título Profesional</label><input class="input-field" data-field="personal.titulo" placeholder="Ingeniero de Software Senior"></div>
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div><label class="label">Email</label><input class="input-field" data-field="personal.email" placeholder="juan@email.com" type="email"></div>
+          <div><label class="label">Teléfono</label><input class="input-field" data-field="personal.telefono" placeholder="+1 234 567 890"></div>
+        </div>
+        <div class="mb-3"><label class="label">Ubicación</label><input class="input-field" data-field="personal.ubicacion" placeholder="Ciudad, País"></div>
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div><label class="label">LinkedIn</label><input class="input-field" data-field="personal.linkedin" placeholder="linkedin.com/in/user"></div>
+          <div><label class="label">GitHub / Portafolio</label><input class="input-field" data-field="personal.github" placeholder="github.com/user"></div>
+        </div>
+        <div class="mb-3"><label class="label">Sitio Web</label><input class="input-field" data-field="personal.sitioWeb" placeholder="www.miweb.com"></div>
+        <div class="mb-3"><label class="label">Resumen Profesional</label><textarea class="input-field" data-field="personal.resumen" placeholder="Escribe un resumen conciso de tu perfil profesional, experiencia destacada y objetivos de carrera..."></textarea></div>
+        <div class="mb-2">
+          <label class="label">Foto de Perfil</label>
+          <div class="flex items-center gap-3">
+            <div id="photoPreview" class="w-16 h-16 rounded-full bg-[var(--surface)] border-2 border-dashed border-[var(--border)] flex items-center justify-center overflow-hidden cursor-pointer" onclick="document.getElementById('photoInput').click()">
+              <i class="fa-solid fa-camera text-[var(--muted)] text-sm" id="photoIcon"></i>
+              <img id="photoImg" class="w-full h-full object-cover hidden" alt="">
+            </div>
+            <div class="flex-1">
+              <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="handlePhoto(event)">
+              <div class="text-xs text-[var(--muted)]">JPG o PNG. Se recomienda 400x400px</div>
+            </div>
+            <label class="text-xs text-[var(--muted)] flex items-center gap-2">Mostrar foto
+              <label class="toggle-switch"><input type="checkbox" data-field="config.incluirFoto" checked onchange="updateField(this)"><span class="toggle-slider"></span></label>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección: Experiencia -->
+    <div class="section-card" data-section="experiencia">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3><i class="fa-solid fa-briefcase text-[var(--accent)] text-xs"></i> Experiencia Laboral</h3>
+        <i class="fa-solid fa-chevron-down chevron"></i>
+      </div>
+      <div class="section-body" id="experienciaContainer"></div>
+    </div>
+
+    <!-- Sección: Educación -->
+    <div class="section-card" data-section="educacion">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3><i class="fa-solid fa-graduation-cap text-[var(--accent)] text-xs"></i> Educación</h3>
+        <i class="fa-solid fa-chevron-down chevron"></i>
+      </div>
+      <div class="section-body" id="educacionContainer"></div>
+    </div>
+
+    <!-- Sección: Habilidades -->
+    <div class="section-card" data-section="habilidades">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3><i class="fa-solid fa-star text-[var(--accent)] text-xs"></i> Habilidades</h3>
+        <i class="fa-solid fa-chevron-down chevron"></i>
+      </div>
+      <div class="section-body" id="habilidadesContainer"></div>
+    </div>
+
+    <!-- Sección: Proyectos -->
+    <div class="section-card" data-section="proyectos">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3><i class="fa-solid fa-diagram-project text-[var(--accent)] text-xs"></i> Proyectos Destacados</h3>
+        <i class="fa-solid fa-chevron-down chevron"></i>
+      </div>
+      <div class="section-body" id="proyectosContainer"></div>
+    </div>
+
+    <!-- Sección: Idiomas -->
+    <div class="section-card" data-section="idiomas">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3><i class="fa-solid fa-language text-[var(--accent)] text-xs"></i> Idiomas</h3>
+        <div class="flex items-center gap-2">
+          <label class="toggle-switch"><input type="checkbox" data-field="config.incluirIdiomas" checked onchange="updateField(this)"><span class="toggle-slider"></span></label>
+          <i class="fa-solid fa-chevron-down chevron"></i>
+        </div>
+      </div>
+      <div class="section-body" id="idiomasContainer"></div>
+    </div>
+
+    <!-- Sección: Certificaciones -->
+    <div class="section-card" data-section="certificaciones">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3><i class="fa-solid fa-certificate text-[var(--accent)] text-xs"></i> Certificaciones</h3>
+        <div class="flex items-center gap-2">
+          <label class="toggle-switch"><input type="checkbox" data-field="config.incluirCertificaciones" checked onchange="updateField(this)"><span class="toggle-slider"></span></label>
+          <i class="fa-solid fa-chevron-down chevron"></i>
+        </div>
+      </div>
+      <div class="section-body" id="certificacionesContainer"></div>
+    </div>
+
+    <!-- Sección: Personalización Visual -->
+    <div class="section-card" data-section="config">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3><i class="fa-solid fa-palette text-[var(--accent)] text-xs"></i> Personalización Visual</h3>
+        <i class="fa-solid fa-chevron-down chevron"></i>
+      </div>
+      <div class="section-body">
+        <div class="mb-4">
+          <label class="label">Color Principal</label>
+          <div class="flex items-center gap-2 flex-wrap">
+            <div class="color-swatch" style="background:#0f172a"><input type="color" value="#0f172a" onchange="setColor('primario',this.value)"></div>
+            <div class="color-swatch" style="background:#1e3a5f"><input type="color" value="#1e3a5f" onchange="setColor('primario',this.value)"></div>
+            <div class="color-swatch" style="background:#064e3b"><input type="color" value="#064e3b" onchange="setColor('primario',this.value)"></div>
+            <div class="color-swatch" style="background:#4c1d95"><input type="color" value="#4c1d95" onchange="setColor('primario',this.value)"></div>
+            <div class="color-swatch" style="background:#7c2d12"><input type="color" value="#7c2d12" onchange="setColor('primario',this.value)"></div>
+            <div class="color-swatch" style="background:#831843"><input type="color" value="#831843" onchange="setColor('primario',this.value)"></div>
+            <div class="color-swatch" style="background:#334155"><input type="color" value="#334155" onchange="setColor('primario',this.value)"></div>
+            <div class="color-swatch" style="background:conic-gradient(red,yellow,lime,aqua,blue,magenta,red);border:1px solid var(--border)"><input type="color" value="#0f172a" onchange="setColor('primario',this.value)" title="Personalizado"></div>
+          </div>
+          <div class="text-[10px] text-[var(--muted)] mt-2">Color actual: <span id="colorPrimarioVal">#0f172a</span></div>
+        </div>
+        <div class="mb-4">
+          <label class="label">Color Secundario</label>
+          <div class="flex items-center gap-2 flex-wrap">
+            <div class="color-swatch" style="background:#64748b"><input type="color" value="#64748b" onchange="setColor('secundario',this.value)"></div>
+            <div class="color-swatch" style="background:#0ea5e9"><input type="color" value="#0ea5e9" onchange="setColor('secundario',this.value)"></div>
+            <div class="color-swatch" style="background:#10b981"><input type="color" value="#10b981" onchange="setColor('secundario',this.value)"></div>
+            <div class="color-swatch" style="background:#f59e0b"><input type="color" value="#f59e0b" onchange="setColor('secundario',this.value)"></div>
+            <div class="color-swatch" style="background:#ef4444"><input type="color" value="#ef4444" onchange="setColor('secundario',this.value)"></div>
+            <div class="color-swatch" style="background:conic-gradient(red,yellow,lime,aqua,blue,magenta,red);border:1px solid var(--border)"><input type="color" value="#64748b" onchange="setColor('secundario',this.value)" title="Personalizado"></div>
+          </div>
+          <div class="text-[10px] text-[var(--muted)] mt-2">Color actual: <span id="colorSecundarioVal">#64748b</span></div>
+        </div>
+        <div class="mb-4">
+          <label class="label">Tipografía</label>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="font-option active" onclick="setFont('Inter',this)" style="font-family:'Inter'"><span class="text-sm font-semibold">Inter</span><div class="text-[10px] text-[var(--muted)]">Moderna y limpia</div></div>
+            <div class="font-option" onclick="setFont('DM Sans',this)" style="font-family:'DM Sans'"><span class="text-sm font-semibold">DM Sans</span><div class="text-[10px] text-[var(--muted)]">Geométrica</div></div>
+            <div class="font-option" onclick="setFont('Merriweather',this)" style="font-family:'Merriweather'"><span class="text-sm font-semibold">Merriweather</span><div class="text-[10px] text-[var(--muted)]">Clásica serif</div></div>
+            <div class="font-option" onclick="setFont('Playfair Display',this)" style="font-family:'Playfair Display'"><span class="text-sm font-semibold">Playfair</span><div class="text-[10px] text-[var(--muted)]">Elegante serif</div></div>
+            <div class="font-option" onclick="setFont('Source Code Pro',this)" style="font-family:'Source Code Pro'"><span class="text-sm font-semibold">Code Pro</span><div class="text-[10px] text-[var(--muted)]">Técnica mono</div></div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="label">Tamaño de fuente base</label>
+          <div class="flex items-center gap-3">
+            <input type="range" min="8" max="13" value="10" step="0.5" id="fontSizeSlider" onchange="setFontSize(this.value)" class="flex-1" style="accent-color:var(--accent)">
+            <span class="text-xs text-[var(--muted)] w-10 text-right" id="fontSizeVal">10pt</span>
+          </div>
+        </div>
+        <div>
+          <label class="label">Espaciado entre secciones</label>
+          <div class="flex items-center gap-3">
+            <input type="range" min="12" max="36" value="22" step="2" id="spacingSlider" onchange="setSpacing(this.value)" class="flex-1" style="accent-color:var(--accent)">
+            <span class="text-xs text-[var(--muted)] w-10 text-right" id="spacingVal">22px</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Datos de ejemplo -->
+    <div class="mb-4">
+      <button class="btn-ghost w-full text-xs justify-center" onclick="loadDemoData()"><i class="fa-solid fa-wand-magic-sparkles"></i> Cargar datos de ejemplo</button>
+    </div>
+  </aside>
+
+  <!-- PANEL DERECHO - PREVIEW -->
+  <main class="flex-1 overflow-hidden flex flex-col" style="height:calc(100vh - 56px)">
+    <!-- Toolbar preview -->
+    <div class="h-12 border-b border-[var(--border)] bg-[var(--surface)] flex items-center justify-between px-4">
+      <div class="flex items-center gap-1">
+        <button class="device-btn active" onclick="setDevice('desktop',this)" title="Escritorio"><i class="fa-solid fa-desktop"></i></button>
+        <button class="device-btn" onclick="setDevice('tablet',this)" title="Tablet"><i class="fa-solid fa-tablet-screen-button"></i></button>
+        <button class="device-btn" onclick="setDevice('mobile',this)" title="Móvil"><i class="fa-solid fa-mobile-screen-button"></i></button>
+        <div class="w-px h-5 bg-[var(--border)] mx-2"></div>
+        <button class="btn-icon" onclick="zoomPreview(-0.1)" title="Alejar"><i class="fa-solid fa-minus text-xs"></i></button>
+        <span class="text-[11px] text-[var(--muted)] w-12 text-center" id="zoomVal">100%</span>
+        <button class="btn-icon" onclick="zoomPreview(0.1)" title="Acercar"><i class="fa-solid fa-plus text-xs"></i></button>
+        <button class="btn-icon" onclick="zoomPreview(0)" title="Reset"><i class="fa-solid fa-expand text-xs"></i></button>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="btn-ghost text-xs" onclick="openExportModal()"><i class="fa-solid fa-file-export"></i> Exportar</button>
+        <button class="btn-primary text-xs" onclick="fullscreenPreview()"><i class="fa-solid fa-up-right-and-down-left-from-center"></i> Pantalla Completa</button>
+      </div>
+    </div>
+    <!-- Contenedor del preview -->
+    <div class="flex-1 overflow-auto flex justify-center p-6 bg-[#0a0a12]" id="previewScroll">
+      <div id="previewWrapper" class="transition-all duration-300" style="transform-origin:top center">
+        <div id="portfolioPreview" class="preview-frame shadow-2xl"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL: Selección de Plantilla -->
+<div class="modal-overlay" id="templateModal">
+  <div class="modal-content" style="max-width:720px">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-lg font-bold">Seleccionar Plantilla</h2>
+        <p class="text-xs text-[var(--muted)] mt-1">Elige el diseño que mejor represente tu perfil profesional</p>
+      </div>
+      <button class="btn-icon" onclick="closeTemplateModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="grid grid-cols-5 gap-3" id="templateGrid"></div>
+  </div>
+</div>
+
+<!-- MODAL: Exportación -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal-content">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-lg font-bold">Exportar Portafolio</h2>
+        <p class="text-xs text-[var(--muted)] mt-1">Selecciona el formato y calidad de exportación</p>
+      </div>
+      <button class="btn-icon" onclick="closeExportModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="grid grid-cols-3 gap-3 mb-6">
+      <div class="export-option" onclick="exportAs('pdf')">
+        <i class="fa-solid fa-file-pdf"></i>
+        <div class="text-sm font-semibold mt-1">PDF</div>
+        <div class="text-[10px] text-[var(--muted)]">Ideal para enviar por email</div>
+      </div>
+      <div class="export-option" onclick="exportAs('png')">
+        <i class="fa-solid fa-image"></i>
+        <div class="text-sm font-semibold mt-1">PNG</div>
+        <div class="text-[10px] text-[var(--muted)]">Alta calidad, sin pérdida</div>
+      </div>
+      <div class="export-option" onclick="exportAs('jpg')">
+        <i class="fa-solid fa-file-image"></i>
+        <div class="text-sm font-semibold mt-1">JPG</div>
+        <div class="text-[10px] text-[var(--muted)]">Tamaño reducido</div>
+      </div>
+    </div>
+    <div class="mb-4">
+      <label class="label">Calidad de exportación</label>
+      <div class="flex gap-2">
+        <button class="btn-ghost text-xs flex-1" onclick="setExportQuality(1,this)" id="q1">1x</button>
+        <button class="btn-ghost text-xs flex-1 active" style="border-color:var(--accent);color:var(--accent)" onclick="setExportQuality(2,this)" id="q2">2x (Recomendado)</button>
+        <button class="btn-ghost text-xs flex-1" onclick="setExportQuality(3,this)" id="q3">3x (Ultra)</button>
+      </div>
+    </div>
+    <div id="exportProgress" class="hidden">
+      <div class="score-bar mb-2"><div class="score-bar-fill" id="exportBar" style="width:0%"></div></div>
+      <div class="text-xs text-[var(--muted)] text-center" id="exportStatus">Preparando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Pantalla Completa -->
+<div class="modal-overlay" id="fullscreenModal" style="padding:20px;align-items:stretch">
+  <div style="position:absolute;top:20px;right:20px;z-index:10">
+    <button class="btn-icon" onclick="closeFullscreen()" style="background:rgba(0,0,0,0.6);border-color:rgba(255,255,255,0.2);color:#fff;width:40px;height:40px"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div style="flex:1;overflow:auto;display:flex;justify-content:center;background:#333;padding:40px">
+    <div id="fullscreenContent" style="transform-origin:top center"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><i class="fa-solid fa-check-circle text-[var(--accent)]" id="toastIcon"></i><span id="toastMsg"></span></div>
+
+<script>
+/* ========================================================================
+   ESTADO GLOBAL DE LA APLICACIÓN
+   ======================================================================== */
+const state = {
+  personal: {
+    nombre: '', apellido: '', titulo: '', email: '', telefono: '',
+    ubicacion: '', linkedin: '', github: '', sitioWeb: '', resumen: '', fotoUrl: ''
+  },
+  experiencia: [],
+  educacion: [],
+  habilidades: [],
+  proyectos: [],
+  idiomas: [],
+  certificaciones: [],
+  config: {
+    plantilla: 'minimal',
+    colorPrimario: '#0f172a',
+    colorSecundario: '#64748b',
+    fuente: 'Inter',
+    fontSize: 10,
+    spacing: 22,
+    incluirFoto: true,
+    incluirIdiomas: true,
+    incluirCertificaciones: true
+  },
+  exportQuality: 2
+};
+
+/* Nombres de plantillas */
+const templateNames = { minimal: 'Minimal', corporativo: 'Corporativo', creativo: 'Creativo', tecnico: 'Técnico', elegante: 'Elegante' };
+
+/* ========================================================================
+   INICIALIZACIÓN
+   ======================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+  initTemplateGrid();
+  addExperiencia();
+  addEducacion();
+  addHabilidad();
+  addProyecto();
+  addIdioma();
+  addCertificacion();
+  bindInputFields();
+  renderPreview();
+  updateScore();
+});
+
+/* Enlazar campos de texto simples */
+function bindInputFields() {
+  document.querySelectorAll('.input-field[data-field]').forEach(el => {
+    el.addEventListener('input', () => updateField(el));
+  });
+}
+
+/* Actualizar campo desde input */
+function updateField(el) {
+  const field = el.dataset.field;
+  if (!field) return;
+  if (el.type === 'checkbox') {
+    setNestedValue(state, field, el.checked);
+  } else {
+    setNestedValue(state, field, el.value);
+  }
+  renderPreview();
+  updateScore();
+}
+
+function setNestedValue(obj, path, val) {
+  const keys = path.split('.');
+  let cur = obj;
+  for (let i = 0; i < keys.length - 1; i++) cur = cur[keys[i]];
+  cur[keys[keys.length - 1]] = val;
+}
+
+/* ========================================================================
+   SECCIONES DESPLEGABLES
+   ======================================================================== */
+function toggleSection(header) {
+  const card = header.closest('.section-card');
+  card.classList.toggle('active');
+}
+
+/* ========================================================================
+   GESTIÓN DE ARRAYS (Experiencia, Educación, etc.)
+   ======================================================================== */
+function addExperiencia() {
+  state.experiencia.push({ empresa: '', cargo: '', fechaInicio: '', fechaFin: '', descripcion: '', actual: false });
+  renderExperiencia();
+}
+function removeExperiencia(i) { state.experiencia.splice(i, 1); renderExperiencia(); renderPreview(); updateScore(); }
+function renderExperiencia() {
+  const c = document.getElementById('experienciaContainer');
+  c.innerHTML = state.experiencia.map((exp, i) => `
+    <div class="p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)] mb-3 fade-in">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[10px] font-bold text-[var(--muted)]">EXPERIENCIA #${i+1}</span>
+        ${state.experiencia.length > 1 ? `<button class="btn-danger" onclick="removeExperiencia(${i})"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+      </div>
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <div><label class="label">Cargo</label><input class="input-field" value="${esc(exp.cargo)}" oninput="state.experiencia[${i}].cargo=this.value;renderPreview();updateScore()"></div>
+        <div><label class="label">Empresa</label><input class="input-field" value="${esc(exp.empresa)}" oninput="state.experiencia[${i}].empresa=this.value;renderPreview();updateScore()"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <div><label class="label">Fecha Inicio</label><input class="input-field" value="${esc(exp.fechaInicio)}" placeholder="Ene 2022" oninput="state.experiencia[${i}].fechaInicio=this.value;renderPreview()"></div>
+        <div><label class="label">Fecha Fin</label><input class="input-field" value="${esc(exp.fechaFin)}" placeholder="Presente" oninput="state.experiencia[${i}].fechaFin=this.value;renderPreview()" ${exp.actual?'disabled':''}></div>
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="toggle-switch"><input type="checkbox" ${exp.actual?'checked':''} onchange="state.experiencia[${i}].actual=this.checked;if(this.checked)state.experiencia[${i}].fechaFin='Presente';renderExperiencia();renderPreview()"><span class="toggle-slider"></span></label>
+        <span class="text-[11px] text-[var(--muted)]">Trabajo actual</span>
+      </div>
+      <div><label class="label">Descripción</label><textarea class="input-field" oninput="state.experiencia[${i}].descripcion=this.value;renderPreview();updateScore()" placeholder="Logros, responsabilidades, tecnologías utilizadas...">${esc(exp.descripcion)}</textarea></div>
+    </div>
+  `).join('') + `<button class="btn-ghost w-full text-xs justify-center mt-1" onclick="addExperiencia()"><i class="fa-solid fa-plus"></i> Agregar Experiencia</button>`;
+}
+
+function addEducacion() {
+  state.educacion.push({ institucion: '', titulo: '', fechaInicio: '', fechaFin: '', descripcion: '' });
+  renderEducacion();
+}
+function removeEducacion(i) { state.educacion.splice(i, 1); renderEducacion(); renderPreview(); updateScore(); }
+function renderEducacion() {
+  const c = document.getElementById('educacionContainer');
+  c.innerHTML = state.educacion.map((ed, i) => `
+    <div class="p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)] mb-3 fade-in">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[10px] font-bold text-[var(--muted)]">EDUCACIÓN #${i+1}</span>
+        ${state.educacion.length > 1 ? `<button class="btn-danger" onclick="removeEducacion(${i})"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+      </div>
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <div><label class="label">Título / Grado</label><input class="input-field" value="${esc(ed.titulo)}" oninput="state.educacion[${i}].titulo=this.value;renderPreview();updateScore()"></div>
+        <div><label class="label">Institución</label><input class="input-field" value="${esc(ed.institucion)}" oninput="state.educacion[${i}].institucion=this.value;renderPreview();updateScore()"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <div><label class="label">Fecha Inicio</label><input class="input-field" value="${esc(ed.fechaInicio)}" placeholder="2018" oninput="state.educacion[${i}].fechaInicio=this.value;renderPreview()"></div>
+        <div><label class="label">Fecha Fin</label><input class="input-field" value="${esc(ed.fechaFin)}" placeholder="2022" oninput="state.educacion[${i}].fechaFin=this.value;renderPreview()"></div>
+      </div>
+      <div><label class="label">Descripción (opcional)</label><textarea class="input-field" oninput="state.educacion[${i}].descripcion=this.value;renderPreview()">${esc(ed.descripcion)}</textarea></div>
+    </div>
+  `).join('') + `<button class="btn-ghost w-full text-xs justify-center mt-1" onclick="addEducacion()"><i class="fa-solid fa-plus"></i> Agregar Educación</button>`;
+}
+
+function addHabilidad() {
+  state.habilidades.push({ nombre: '', nivel: 80, categoria: 'Técnica' });
+  renderHabilidades();
+}
+function removeHabilidad(i) { state.habilidades.splice(i, 1); renderHabilidades(); renderPreview(); updateScore(); }
+function renderHabilidades() {
+  const c = document.getElementById('habilidadesContainer');
+  c.innerHTML = state.habilidades.map((h, i) => `
+    <div class="p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)] mb-3 fade-in">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[10px] font-bold text-[var(--muted)]">HABILIDAD #${i+1}</span>
+        ${state.habilidades.length > 1 ? `<button class="btn-danger" onclick="removeHabilidad(${i})"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+      </div>
+      <div class="grid grid-cols-3 gap-2 mb-2">
+        <div class="col-span-2"><label class="label">Habilidad</label><input class="input-field" value="${esc(h.nombre)}" oninput="state.habilidades[${i}].nombre=this.value;renderPreview();updateScore()"></div>
+        <div><label class="label">Nivel: ${h.nivel}%</label><input type="range" min="10" max="100" value="${h.nivel}" oninput="state.habilidades[${i}].nivel=+this.value;renderHabilidades();renderPreview()" style="accent-color:var(--accent);margin-top:18px" class="w-full"></div>
+      </div>
+      <div><label class="label">Categoría</label>
+        <select class="input-field" onchange="state.habilidades[${i}].categoria=this.value;renderPreview()">
+          <option ${h.categoria==='Técnica'?'selected':''}>Técnica</option>
+          <option ${h.categoria==='Blanda'?'selected':''}>Blanda</option>
+          <option ${h.categoria==='Herramienta'?'selected':''}>Herramienta</option>
+          <option ${h.categoria==='Framework'?'selected':''}>Framework</option>
+          <option ${h.categoria==='Lenguaje'?'selected':''}>Lenguaje</option>
+        </select>
+      </div>
+    </div>
+  `).join('') + `<button class="btn-ghost w-full text-xs justify-center mt-1" onclick="addHabilidad()"><i class="fa-solid fa-plus"></i> Agregar Habilidad</button>`;
+}
+
+function addProyecto() {
+  state.proyectos.push({ nombre: '', descripcion: '', tecnologias: '', enlace: '' });
+  renderProyectos();
+}
+function removeProyecto(i) { state.proyectos.splice(i, 1); renderProyectos(); renderPreview(); updateScore(); }
+function renderProyectos() {
+  const c = document.getElementById('proyectosContainer');
+  c.innerHTML = state.proyectos.map((p, i) => `
+    <div class="p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)] mb-3 fade-in">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[10px] font-bold text-[var(--muted)]">PROYECTO #${i+1}</span>
+        ${state.proyectos.length > 1 ? `<button class="btn-danger" onclick="removeProyecto(${i})"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+      </div>
+      <div class="mb-2"><label class="label">Nombre del Proyecto</label><input class="input-field" value="${esc(p.nombre)}" oninput="state.proyectos[${i}].nombre=this.value;renderPreview();updateScore()"></div>
+      <div class="mb-2"><label class="label">Descripción</label><textarea class="input-field" oninput="state.proyectos[${i}].descripcion=this.value;renderPreview();updateScore()">${esc(p.descripcion)}</textarea></div>
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="label">Tecnologías</label><input class="input-field" value="${esc(p.tecnologias)}" placeholder="React, Node, AWS..." oninput="state.proyectos[${i}].tecnologias=this.value;renderPreview()"></div>
+        <div><label class="label">Enlace</label><input class="input-field" value="${esc(p.enlace)}" placeholder="github.com/proyecto" oninput="state.proyectos[${i}].enlace=this.value;renderPreview()"></div>
+      </div>
+    </div>
+  `).join('') + `<button class="btn-ghost w-full text-xs justify-center mt-1" onclick="addProyecto()"><i class="fa-solid fa-plus"></i> Agregar Proyecto</button>`;
+}
+
+function addIdioma() {
+  state.idiomas.push({ nombre: '', nivel: 'Intermedio' });
+  renderIdiomas();
+}
+function removeIdioma(i) { state.idiomas.splice(i, 1); renderIdiomas(); renderPreview(); updateScore(); }
+function renderIdiomas() {
+  const c = document.getElementById('idiomasContainer');
+  c.innerHTML = state.idiomas.map((id, i) => `
+    <div class="flex items-center gap-2 mb-2 fade-in">
+      <input class="input-field flex-1" value="${esc(id.nombre)}" placeholder="Idioma" oninput="state.idiomas[${i}].nombre=this.value;renderPreview();updateScore()">
+      <select class="input-field" style="width:140px" onchange="state.idiomas[${i}].nivel=this.value;renderPreview()">
+        <option ${id.nivel==='Nativo'?'selected':''}>Nativo</option>
+        <option ${id.nivel==='Avanzado'?'selected':''}>Avanzado</option>
+        <option ${id.nivel==='Intermedio'?'selected':''}>Intermedio</option>
+        <option ${id.nivel==='Básico'?'selected':''}>Básico</option>
+      </select>
+      ${state.idiomas.length > 1 ? `<button class="btn-danger" onclick="removeIdioma(${i})"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+    </div>
+  `).join('') + `<button class="btn-ghost w-full text-xs justify-center mt-2" onclick="addIdioma()"><i class="fa-solid fa-plus"></i> Agregar Idioma</button>`;
+}
+
+function addCertificacion() {
+  state.certificaciones.push({ nombre: '', institucion: '', fecha: '' });
+  renderCertificaciones();
+}
+function removeCertificacion(i) { state.certificaciones.splice(i, 1); renderCertificaciones(); renderPreview(); updateScore(); }
+function renderCertificaciones() {
+  const c = document.getElementById('certificacionesContainer');
+  c.innerHTML = state.certificaciones.map((cert, i) => `
+    <div class="flex items-center gap-2 mb-2 fade-in">
+      <input class="input-field flex-1" value="${esc(cert.nombre)}" placeholder="Nombre de certificación" oninput="state.certificaciones[${i}].nombre=this.value;renderPreview();updateScore()">
+      <input class="input-field" style="width:130px" value="${esc(cert.institucion)}" placeholder="Institución" oninput="state.certificaciones[${i}].institucion=this.value;renderPreview()">
+      <input class="input-field" style="width:90px" value="${esc(cert.fecha)}" placeholder="2024" oninput="state.certificaciones[${i}].fecha=this.value;renderPreview()">
+      ${state.certificaciones.length > 1 ? `<button class="btn-danger" onclick="removeCertificacion(${i})"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+    </div>
+  `).join('') + `<button class="btn-ghost w-full text-xs justify-center mt-2" onclick="addCertificacion()"><i class="fa-solid fa-plus"></i> Agregar Certificación</button>`;
+}
+
+/* ========================================================================
+   FOTO
+   ======================================================================== */
+function handlePhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    state.personal.fotoUrl = ev.target.result;
+    document.getElementById('photoImg').src = ev.target.result;
+    document.getElementById('photoImg').classList.remove('hidden');
+    document.getElementById('photoIcon').classList.add('hidden');
+    renderPreview();
+    updateScore();
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ========================================================================
+   PERSONALIZACIÓN VISUAL
+   ======================================================================== */
+function setColor(type, val) {
+  state.config[type === 'primario' ? 'colorPrimario' : 'colorSecundario'] = val;
+  document.getElementById(type === 'primario' ? 'colorPrimarioVal' : 'colorSecundarioVal').textContent = val;
+  renderPreview();
+}
+function setFont(name, el) {
+  state.config.fuente = name;
+  document.querySelectorAll('.font-option').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  renderPreview();
+}
+function setFontSize(val) {
+  state.config.fontSize = +val;
+  document.getElementById('fontSizeVal').textContent = val + 'pt';
+  renderPreview();
+}
+function setSpacing(val) {
+  state.config.spacing = +val;
+  document.getElementById('spacingVal').textContent = val + 'px';
+  renderPreview();
+}
+
+/* ========================================================================
+   PLANTILLAS - GRID DE SELECCIÓN
+   ======================================================================== */
+function initTemplateGrid() {
+  const grid = document.getElementById('templateGrid');
+  const templates = ['minimal', 'corporativo', 'creativo', 'tecnico', 'elegante'];
+  grid.innerHTML = templates.map(t => `
+    <div class="template-card ${state.config.plantilla === t ? 'active' : ''}" onclick="selectTemplate('${t}')">
+      <div class="badge">Activa</div>
+      <div style="height:180px;background:#f8f9fa;padding:10px;position:relative;overflow:hidden" id="tplThumb_${t}"></div>
+      <div style="padding:10px;background:var(--card)">
+        <div class="text-xs font-semibold text-center">${templateNames[t]}</div>
+      </div>
+    </div>
+  `).join('');
+  /* Generar miniaturas */
+  setTimeout(() => {
+    templates.forEach(t => {
+      const thumb = document.getElementById('tplThumb_' + t);
+      if (thumb) thumb.innerHTML = getTemplateThumbnail(t);
+    });
+  }, 100);
+}
+
+function getTemplateThumbnail(t) {
+  const c = state.config.colorPrimario;
+  switch(t) {
+    case 'minimal': return `<div style="border-bottom:3px solid ${c};padding-bottom:8px;margin-bottom:8px"><div style="width:40%;height:4px;background:${c};border-radius:2px;margin-bottom:4px"></div><div style="width:60%;height:3px;background:#ddd;border-radius:2px"></div></div><div style="margin-bottom:6px"><div style="width:50%;height:3px;background:#bbb;border-radius:2px;margin-bottom:3px"></div><div style="width:90%;height:2px;background:#e5e5e5;border-radius:2px;margin-bottom:2px"></div><div style="width:85%;height:2px;background:#e5e5e5;border-radius:2px"></div></div><div style="margin-bottom:6px"><div style="width:50%;height:3px;background:#bbb;border-radius:2px;margin-bottom:3px"></div><div style="width:90%;height:2px;background:#e5e5e5;border-radius:2px;margin-bottom:2px"></div><div style="width:80%;height:2px;background:#e5e5e5;border-radius:2px"></div></div>`;
+    case 'corporativo': return `<div style="display:flex;height:100%;gap:0"><div style="width:35%;background:${c};padding:8px;border-radius:4px"><div style="width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.3);margin:0 auto 6px"></div><div style="height:2px;background:rgba(255,255,255,0.4);border-radius:1px;margin-bottom:3px"></div><div style="height:2px;background:rgba(255,255,255,0.3);border-radius:1px;margin-bottom:3px"></div><div style="height:2px;background:rgba(255,255,255,0.2);border-radius:1px"></div></div><div style="flex:1;padding:8px"><div style="width:60%;height:4px;background:${c};border-radius:2px;margin-bottom:6px"></div><div style="width:90%;height:2px;background:#e5e5e5;border-radius:2px;margin-bottom:2px"></div><div style="width:85%;height:2px;background:#e5e5e5;border-radius:2px;margin-bottom:6px"></div><div style="width:50%;height:3px;background:#bbb;border-radius:2px;margin-bottom:3px"></div><div style="width:90%;height:2px;background:#e5e5e5;border-radius:2px;margin-bottom:2px"></div><div style="width:80%;height:2px;background:#e5e5e5;border-radius:2px"></div></div></div>`;
+    case 'creativo': return `<div style="background:${c};padding:10px;border-radius:4px;margin-bottom:8px"><div style="width:50%;height:5px;background:rgba(255,255,255,0.8);border-radius:2px;margin-bottom:4px"></div><div style="width:70%;height:2px;background:rgba(255,255,255,0.4);border-radius:1px"></div></div><div style="display:flex;gap:6px;margin-bottom:6px"><div style="flex:1;padding:6px;border:1px solid #e5e5e5;border-radius:4px"><div style="width:60%;height:2px;background:#bbb;border-radius:1px;margin-bottom:2px"></div><div style="width:90%;height:1.5px;background:#e5e5e5;border-radius:1px;margin-bottom:1px"></div><div style="width:70%;height:1.5px;background:#e5e5e5;border-radius:1px"></div></div><div style="flex:1;padding:6px;border:1px solid #e5e5e5;border-radius:4px"><div style="width:50%;height:2px;background:#bbb;border-radius:1px;margin-bottom:2px"></div><div style="width:80%;height:1.5px;background:#e5e5e5;border-radius:1px;margin-bottom:1px"></div><div style="width:60%;height:1.5px;background:#e5e5e5;border-radius:1px"></div></div></div><div style="display:flex;gap:4px;flex-wrap:wrap"><div style="padding:2px 8px;background:#f0f0f0;border-radius:3px;font-size:6px;color:#666">Skill</div><div style="padding:2px 8px;background:#f0f0f0;border-radius:3px;font-size:6px;color:#666">Skill</div><div style="padding:2px 8px;background:#f0f0f0;border-radius:3px;font-size:6px;color:#666">Skill</div></div>`;
+    case 'tecnico': return `<div style="font-family:monospace"><div style="border-bottom:2px solid ${c};padding-bottom:6px;margin-bottom:6px"><div style="width:45%;height:4px;background:${c};border-radius:1px;margin-bottom:3px"></div><div style="width:65%;height:2px;background:#ccc;border-radius:1px"></div></div><div style="background:#f5f5f5;padding:4px 6px;border-radius:3px;margin-bottom:4px;border-left:3px solid ${c}"><div style="width:40%;height:2px;background:#999;border-radius:1px;margin-bottom:2px"></div><div style="width:85%;height:1.5px;background:#ddd;border-radius:1px;margin-bottom:1px"></div><div style="width:75%;height:1.5px;background:#ddd;border-radius:1px"></div></div><div style="background:#f5f5f5;padding:4px 6px;border-radius:3px;border-left:3px solid ${c}"><div style="width:35%;height:2px;background:#999;border-radius:1px;margin-bottom:2px"></div><div style="width:80%;height:1.5px;background:#ddd;border-radius:1px;margin-bottom:1px"></div><div style="width:65%;height:1.5px;background:#ddd;border-radius:1px"></div></div></div>`;
+    case 'elegante': return `<div style="text-align:center;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid #ddd"><div style="width:50%;height:5px;background:${c};border-radius:2px;margin:0 auto 4px"></div><div style="width:35%;height:2px;background:#bbb;border-radius:1px;margin:0 auto"></div></div><div style="text-align:center;margin-bottom:6px"><div style="width:75%;height:2px;background:#e5e5e5;border-radius:1px;margin:0 auto 2px"></div><div style="width:85%;height:1.5px;background:#eee;border-radius:1px;margin:0 auto 2px"></div><div style="width:60%;height:1.5px;background:#eee;border-radius:1px;margin:0 auto"></div></div><div style="border-top:1px solid ${c};border-bottom:1px solid ${c};padding:4px 0;margin-bottom:6px"><div style="width:40%;height:2px;background:${c};border-radius:1px;margin:0 auto 2px"></div><div style="width:80%;height:1.5px;background:#e5e5e5;border-radius:1px;margin:0 auto 1px"></div><div style="width:70%;height:1.5px;background:#e5e5e5;border-radius:1px;margin:0 auto"></div></div>`;
+    default: return '';
+  }
+}
+
+function selectTemplate(t) {
+  state.config.plantilla = t;
+  document.getElementById('currentTemplateName').textContent = templateNames[t];
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  renderPreview();
+  showToast('Plantilla ' + templateNames[t] + ' seleccionada');
+  setTimeout(closeTemplateModal, 400);
+}
+
+/* ========================================================================
+   MODALES
+   ======================================================================== */
+function openTemplateModal() { document.getElementById('templateModal').classList.add('show'); }
+function closeTemplateModal() { document.getElementById('templateModal').classList.remove('show'); }
+function openExportModal() { document.getElementById('exportModal').classList.add('show'); }
+function closeExportModal() { document.getElementById('exportModal').classList.remove('show'); document.getElementById('exportProgress').classList.add('hidden'); }
+function fullscreenPreview() {
+  const modal = document.getElementById('fullscreenModal');
+  document.getElementById('fullscreenContent').innerHTML = document.getElementById('portfolioPreview').innerHTML;
+  modal.classList.add('show');
+}
+function closeFullscreen() { document.getElementById('fullscreenModal').classList.remove('show'); }
+
+/* ========================================================================
+   PREVIEW - DISPOSITIVO Y ZOOM
+   ======================================================================== */
+let currentZoom = 1;
+function setDevice(device, btn) {
+  document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const wrapper = document.getElementById('previewWrapper');
+  const page = document.getElementById('portfolioPreview');
+  switch(device) {
+    case 'desktop': wrapper.style.width = 'auto'; page.style.width = '210mm'; break;
+    case 'tablet': wrapper.style.width = 'auto'; page.style.width = '148mm'; break;
+    case 'mobile': wrapper.style.width = 'auto'; page.style.width = '105mm'; break;
+  }
+}
+function zoomPreview(delta) {
+  if (delta === 0) { currentZoom = 1; } else { currentZoom = Math.max(0.3, Math.min(2, currentZoom + delta)); }
+  document.getElementById('previewWrapper').style.transform = `scale(${currentZoom})`;
+  document.getElementById('zoomVal').textContent = Math.round(currentZoom * 100) + '%';
+}
+
+/* ========================================================================
+   SCORE DE COMPLETITUD
+   ======================================================================== */
+function updateScore() {
+  const p = state.personal;
+  let total = 0, filled = 0;
+  const fields = ['nombre','apellido','titulo','email','resumen'];
+  fields.forEach(f => { total++; if (p[f] && p[f].trim()) filled++; });
+  total += 2; if (state.experiencia.some(e => e.cargo && e.empresa)) filled += 2;
+  total += 2; if (state.educacion.some(e => e.titulo && e.institucion)) filled += 2;
+  total += 1; if (state.habilidades.some(h => h.nombre)) filled++;
+  total += 1; if (state.proyectos.some(pr => pr.nombre)) filled++;
+  total += 1; if (p.fotoUrl) filled++;
+  const pct = Math.round((filled / total) * 100);
+  const circle = document.getElementById('scoreCircle');
+  const circ = 2 * Math.PI * 20;
+  circle.style.strokeDashoffset = circ - (circ * pct / 100);
+  document.getElementById('scoreText').textContent = pct + '%';
+}
+
+/* ========================================================================
+   RENDERIZADO DE PLANTILLAS
+   ======================================================================== */
+function renderPreview() {
+  const container = document.getElementById('portfolioPreview');
+  container.innerHTML = renderPortfolioPage();
+}
+
+function renderPortfolioPage() {
+  const d = state;
+  const p = d.personal;
+  const c = d.config;
+  const fullName = [p.nombre, p.apellido].filter(Boolean).join(' ') || 'Tu Nombre';
+  const title = p.titulo || 'Tu Título Profesional';
+  const cp = c.colorPrimario;
+  const cs = c.colorSecundario;
+  const ff = c.fuente;
+  const fs = c.fontSize;
+  const sp = c.spacing;
+
+  /* Foto HTML */
+  const fotoHTML = (p.fotoUrl && c.incluirFoto) ? `<img src="${p.fotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" alt="Foto">` : '';
+
+  /* Secciones condicionales */
+  const expHTML = d.experiencia.filter(e => e.cargo || e.empresa).length ? buildExperiencia(d, cp, cs, ff, fs, sp) : '';
+  const eduHTML = d.educacion.filter(e => e.titulo || e.institucion).length ? buildEducacion(d, cp, cs, ff, fs, sp) : '';
+  const habHTML = d.habilidades.filter(h => h.nombre).length ? buildHabilidades(d, cp, cs, ff, fs, sp) : '';
+  const proyHTML = d.proyectos.filter(pr => pr.nombre).length ? buildProyectos(d, cp, cs, ff, fs, sp) : '';
+  const idiomasHTML = (c.incluirIdiomas && d.idiomas.filter(id => id.nombre).length) ? buildIdiomas(d, cp, cs, ff, fs, sp) : '';
+  const certHTML = (c.incluirCertificaciones && d.certificaciones.filter(ct => ct.nombre).length) ? buildCertificaciones(d, cp, cs, ff, fs, sp) : '';
+  const resumenHTML = p.resumen ? `<p style="color:#4a5568;font-size:${fs-1}pt;line-height:1.6;margin:0">${esc(p.resumen)}</p>` : '';
+
+  /* Contacto */
+  const contactItems = [];
+  if (p.email) contactItems.push(`<span style="display:flex;align-items:center;gap:6px"><span style="color:${cp}">&#9993;</span>${esc(p.email)}</span>`);
+  if (p.telefono) contactItems.push(`<span style="display:flex;align-items:center;gap:6px"><span style="color:${cp}">&#9742;</span>${esc(p.telefono)}</span>`);
+  if (p.ubicacion) contactItems.push(`<span style="display:flex;align-items:center;gap:6px"><span style="color:${cp}">&#9679;</span>${esc(p.ubicacion)}</span>`);
+  if (p.linkedin) contactItems.push(`<span style="display:flex;align-items:center;gap:6px"><span style="color:${cp}">in</span>${esc(p.linkedin)}</span>`);
+  if (p.github) contactItems.push(`<span style="display:flex;align-items:center;gap:6px"><span style="color:${cp}">&#60;/&#62;</span>${esc(p.github)}</span>`);
+  if (p.sitioWeb) contactItems.push(`<span style="display:flex;align-items:center;gap:6px"><span style="color:${cp}">&#9737;</span>${esc(p.sitioWeb)}</span>`);
+
+  const contactHTML = contactItems.length ? contactItems.join('') : '<span style="color:#999">Sin datos de contacto</span>';
+
+  switch(c.plantilla) {
+    case 'minimal': return renderMinimal({fullName,title,resumenHTML,expHTML,eduHTML,habHTML,proyHTML,idiomasHTML,certHTML,contactHTML,fotoHTML,cp,cs,ff,fs,sp});
+    case 'corporativo': return renderCorporativo({fullName,title,resumenHTML,expHTML,eduHTML,habHTML,proyHTML,idiomasHTML,certHTML,contactHTML,fotoHTML,cp,cs,ff,fs,sp});
+    case 'creativo': return renderCreativo({fullName,title,resumenHTML,expHTML,eduHTML,habHTML,proyHTML,idiomasHTML,certHTML,contactHTML,fotoHTML,cp,cs,ff,fs,sp});
+    case 'tecnico': return renderTecnico({fullName,title,resumenHTML,expHTML,eduHTML,habHTML,proyHTML,idiomasHTML,certHTML,contactHTML,fotoHTML,cp,cs,ff,fs,sp});
+    case 'elegante': return renderElegante({fullName,title,resumenHTML,expHTML,eduHTML,habHTML,proyHTML,idiomasHTML,certHTML,contactHTML,fotoHTML,cp,cs,ff,fs,sp});
+    default: return renderMinimal(arguments[0]);
+  }
+}
+
+/* ---- PLANTILLA 1: MINIMAL ---- */
+function renderMinimal(o) {
+  return `<div class="portfolio-page" style="font-family:'${o.ff}',sans-serif;font-size:${o.fs}pt;padding:${o.sp*1.5}px ${o.sp*1.8}px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:${o.sp}px;padding-bottom:${o.sp}px;border-bottom:2px solid ${o.cp}">
+      <div style="flex:1">
+        <h1 style="font-size:${o.fs*3}pt;font-weight:800;color:${o.cp};margin:0;line-height:1.1;letter-spacing:-0.02em">${o.fullName}</h1>
+        <div style="font-size:${o.fs*1.3}pt;color:${o.cs};font-weight:400;margin-top:4px;letter-spacing:0.02em">${o.title}</div>
+      </div>
+      ${o.fotoHTML ? `<div style="width:72px;height:72px;border-radius:50%;overflow:hidden;border:3px solid ${o.cp};flex-shrink:0;margin-left:16px">${o.fotoHTML}</div>` : ''}
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px 20px;font-size:${o.fs-1}pt;color:#4a5568;margin-bottom:${o.sp}px">${o.contactHTML}</div>
+    ${o.resumenHTML ? `<div style="margin-bottom:${o.sp}px;padding-bottom:${o.sp}px;border-bottom:1px solid #e2e8f0">${o.resumenHTML}</div>` : ''}
+    ${o.expHTML}
+    ${o.eduHTML}
+    ${o.habHTML}
+    ${o.proyHTML}
+    ${o.idiomasHTML}
+    ${o.certHTML}
+  </div>`;
+}
+
+/* ---- PLANTILLA 2: CORPORATIVO ---- */
+function renderCorporativo(o) {
+  return `<div class="portfolio-page" style="font-family:'${o.ff}',sans-serif;font-size:${o.fs}pt;display:flex">
+    <div style="width:38%;background:${o.cp};color:#fff;padding:${o.sp*1.5}px ${o.sp}px;position:relative">
+      ${o.fotoHTML ? `<div style="width:80px;height:80px;border-radius:50%;overflow:hidden;border:3px solid rgba(255,255,255,0.3);margin:0 auto 12px">${o.fotoHTML}</div>` : ''}
+      <div style="text-align:center;margin-bottom:${o.sp}px">
+        <div style="font-size:${o.fs*1.8}pt;font-weight:700;line-height:1.2">${o.fullName}</div>
+        <div style="font-size:${o.fs-0.5}pt;opacity:0.7;margin-top:4px">${o.title}</div>
+      </div>
+      <div style="width:40px;height:2px;background:rgba(255,255,255,0.3);margin:0 auto ${o.sp}px"></div>
+      <div style="font-size:${o.fs-1.5}pt;line-height:2;opacity:0.85">
+        ${o.contactHTML}
+      </div>
+      ${o.habHTML ? `<div style="margin-top:${o.sp}px"><div style="font-size:${o.fs-0.5}pt;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;opacity:0.6">Habilidades</div>${o.habHTML}</div>` : ''}
+      ${o.idiomasHTML ? `<div style="margin-top:${o.sp}px"><div style="font-size:${o.fs-0.5}pt;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;opacity:0.6">Idiomas</div>${o.idiomasHTML}</div>` : ''}
+    </div>
+    <div style="flex:1;padding:${o.sp*1.5}px ${o.sp*1.3}px">
+      ${o.resumenHTML ? `<div style="margin-bottom:${o.sp}px">${sectionTitle('Perfil Profesional',o.cp,o.fs)}<div style="color:#4a5568;font-size:${o.fs-1}pt;line-height:1.6;margin-top:6px">${o.resumenHTML}</div></div>` : ''}
+      ${o.expHTML}
+      ${o.eduHTML}
+      ${o.proyHTML}
+      ${o.certHTML}
+    </div>
+  </div>`;
+}
+
+/* ---- PLANTILLA 3: CREATIVO ---- */
+function renderCreativo(o) {
+  return `<div class="portfolio-page" style="font-family:'${o.ff}',sans-serif;font-size:${o.fs}pt">
+    <div style="background:${o.cp};padding:${o.sp*1.5}px ${o.sp*1.8}px;display:flex;align-items:center;gap:16px">
+      ${o.fotoHTML ? `<div style="width:64px;height:64px;border-radius:12px;overflow:hidden;flex-shrink:0;border:2px solid rgba(255,255,255,0.2)">${o.fotoHTML}</div>` : ''}
+      <div style="color:#fff">
+        <h1 style="font-size:${o.fs*2.6}pt;font-weight:800;margin:0;line-height:1.1">${o.fullName}</h1>
+        <div style="font-size:${o.fs*1.1}pt;opacity:0.8;margin-top:4px;font-weight:300">${o.title}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+      <div style="padding:${o.sp*1.2}px;border-right:1px solid #e2e8f0">
+        <div style="font-size:${o.fs-0.5}pt;font-weight:700;color:${o.cp};text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">Contacto</div>
+        <div style="font-size:${o.fs-1}pt;color:#4a5568;line-height:2.2">${o.contactHTML}</div>
+        ${o.habHTML ? `<div style="margin-top:${o.sp}px">${sectionTitle('Habilidades',o.cp,o.fs)}${o.habHTML}</div>` : ''}
+        ${o.idiomasHTML ? `<div style="margin-top:${o.sp}px">${sectionTitle('Idiomas',o.cp,o.fs)}${o.idiomasHTML}</div>` : ''}
+      </div>
+      <div style="padding:${o.sp*1.2}px">
+        ${o.resumenHTML ? `<div style="margin-bottom:${o.sp}px">${sectionTitle('Sobre Mí',o.cp,o.fs)}<div style="color:#4a5568;font-size:${o.fs-1}pt;line-height:1.6;margin-top:6px">${o.resumenHTML}</div></div>` : ''}
+        ${o.expHTML}
+        ${o.eduHTML}
+        ${o.proyHTML}
+        ${o.certHTML}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---- PLANTILLA 4: TÉCNICO ---- */
+function renderTecnico(o) {
+  const monoFont = "'Source Code Pro', monospace";
+  return `<div class="portfolio-page" style="font-family:'${o.ff}',sans-serif;font-size:${o.fs}pt;padding:${o.sp*1.5}px ${o.sp*1.8}px">
+    <div style="border-bottom:3px solid ${o.cp};padding-bottom:${o.sp}px;margin-bottom:${o.sp}px;display:flex;align-items:flex-start;justify-content:space-between">
+      <div>
+        <h1 style="font-size:${o.fs*2.8}pt;font-weight:900;color:${o.cp};margin:0;font-family:${monoFont};line-height:1">${o.fullName}</h1>
+        <div style="font-size:${o.fs*1.1}pt;color:${o.cs};margin-top:6px;font-family:${monoFont}">&gt; ${o.title}</div>
+      </div>
+      ${o.fotoHTML ? `<div style="width:64px;height:64px;border-radius:8px;overflow:hidden;border:2px solid ${o.cp};flex-shrink:0;margin-left:16px">${o.fotoHTML}</div>` : ''}
+    </div>
+    <div style="background:#f7f8fa;border-left:3px solid ${o.cp};padding:8px 12px;margin-bottom:${o.sp}px;font-size:${o.fs-1}pt;font-family:${monoFont};color:#4a5568;display:flex;flex-wrap:wrap;gap:4px 16px">${o.contactHTML}</div>
+    ${o.resumenHTML ? `<div style="margin-bottom:${o.sp}px">${sectionTitle('// Perfil',o.cp,o.fs)}<div style="color:#4a5568;font-size:${o.fs-1}pt;line-height:1.6;margin-top:6px;font-family:${monoFont}">${o.resumenHTML}</div></div>` : ''}
+    ${o.expHTML ? `<div style="margin-bottom:${o.sp}px">${sectionTitle('// Experiencia',o.cp,o.fs)}${state.experiencia.filter(e=>e.cargo||e.empresa).map(e=>`<div style="background:#f7f8fa;border-left:3px solid ${o.cp};padding:8px 12px;margin-bottom:8px;font-family:${monoFont}"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:700;color:${o.cp}">${esc(e.cargo)}</span><span style="font-size:${o.fs-1.5}pt;color:#999">${esc(e.fechaInicio)} — ${esc(e.fechaFin)}</span></div><div style="color:#4a5568;font-size:${o.fs-0.5}pt;margin-top:2px">${esc(e.empresa)}</div>${e.descripcion?`<div style="color:#666;font-size:${o.fs-1}pt;margin-top:4px;white-space:pre-line">${esc(e.descripcion)}</div>`:''}</div>`).join('')}</div>` : ''}
+    ${o.eduHTML ? `<div style="margin-bottom:${o.sp}px">${sectionTitle('// Educación',o.cp,o.fs)}${state.educacion.filter(e=>e.titulo||e.institucion).map(e=>`<div style="background:#f7f8fa;border-left:3px solid ${o.cs};padding:8px 12px;margin-bottom:6px;font-family:${monoFont}"><div style="font-weight:600;color:${o.cp}">${esc(e.titulo)}</div><div style="color:#666;font-size:${o.fs-0.5}pt">${esc(e.institucion)} | ${esc(e.fechaInicio)} — ${esc(e.fechaFin)}</div></div>`).join('')}</div>` : ''}
+    ${o.habHTML ? `<div style="margin-bottom:${o.sp}px">${sectionTitle('// Habilidades',o.cp,o.fs)}${state.habilidades.filter(h=>h.nombre).map(h=>`<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-family:${monoFont};font-size:${o.fs-0.5}pt"><span style="color:${o.cp}">${esc(h.nombre)}</span><span style="color:#999">${h.nivel}%</span></div><div style="height:4px;background:#e2e8f0;border-radius:2px;margin-top:3px"><div style="height:100%;width:${h.nivel}%;background:${o.cp};border-radius:2px"></div></div></div>`).join('')}</div>` : ''}
+    ${o.proyHTML}
+    ${o.idiomasHTML}
+    ${o.certHTML}
+  </div>`;
+}
+
+/* ---- PLANTILLA 5: ELEGANTE ---- */
+function renderElegante(o) {
+  const serif = "'Playfair Display', 'Merriweather', serif";
+  return `<div class="portfolio-page" style="font-family:'${o.ff}',sans-serif;font-size:${o.fs}pt;padding:${o.sp*2}px ${o.sp*2.2}px">
+    <div style="text-align:center;margin-bottom:${o.sp*1.2}px;padding-bottom:${o.sp}px;border-bottom:1px solid #ddd">
+      ${o.fotoHTML ? `<div style="width:72px;height:72px;border-radius:50%;overflow:hidden;margin:0 auto 10px;border:2px solid ${o.cp}">${o.fotoHTML}</div>` : ''}
+      <h1 style="font-family:${serif};font-size:${o.fs*3}pt;font-weight:700;color:${o.cp};margin:0;letter-spacing:0.01em">${o.fullName}</h1>
+      <div style="font-size:${o.fs*1.2}pt;color:${o.cs};margin-top:6px;font-style:italic;font-family:${serif}">${o.title}</div>
+      <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:6px 18px;font-size:${o.fs-1.5}pt;color:#666;margin-top:12px">${o.contactHTML}</div>
+    </div>
+    ${o.resumenHTML ? `<div style="margin-bottom:${o.sp}px;text-align:center;color:#4a5568;font-size:${o.fs-0.5}pt;line-height:1.7;max-width:90%;margin-left:auto;margin-right:auto">${o.resumenHTML}</div>` : ''}
+    ${o.expHTML ? `<div style="margin-bottom:${o.sp}px">${sectionTitleElegant('Experiencia Profesional',o.cp,o.fs,serif)}${state.experiencia.filter(e=>e.cargo||e.empresa).map(e=>`<div style="margin-bottom:${o.sp*0.7}px;padding-bottom:${o.sp*0.5}px;border-bottom:1px dashed #e2e8f0"><div style="display:flex;justify-content:space-between;align-items:baseline"><div><span style="font-family:${serif};font-size:${o.fs*1.2}pt;font-weight:700;color:${o.cp}">${esc(e.cargo)}</span><span style="color:${o.cs};font-size:${o.fs-0.5}pt;margin-left:8px">— ${esc(e.empresa)}</span></div><span style="font-size:${o.fs-1.5}pt;color:#999;font-style:italic">${esc(e.fechaInicio)} — ${esc(e.fechaFin)}</span></div>${e.descripcion?`<div style="color:#4a5568;font-size:${o.fs-1}pt;margin-top:4px;line-height:1.6">${esc(e.descripcion)}</div>`:''}</div>`).join('')}</div>` : ''}
+    ${o.eduHTML ? `<div style="margin-bottom:${o.sp}px">${sectionTitleElegant('Formación Académica',o.cp,o.fs,serif)}${state.educacion.filter(e=>e.titulo||e.institucion).map(e=>`<div style="margin-bottom:${o.sp*0.5}px"><div style="font-family:${serif};font-weight:700;color:${o.cp}">${esc(e.titulo)}</div><div style="color:#666;font-size:${o.fs-0.5}pt">${esc(e.institucion)} | ${esc(e.fechaInicio)} — ${esc(e.fechaFin)}</div></div>`).join('')}</div>` : ''}
+    ${o.habHTML ? `<div style="margin-bottom:${o.sp}px">${sectionTitleElegant('Habilidades',o.cp,o.fs,serif)}<div style="display:flex;flex-wrap:wrap;gap:6px">${state.habilidades.filter(h=>h.nombre).map(h=>`<span style="padding:4px 14px;border:1px solid ${o.cp};color:${o.cp};border-radius:20px;font-size:${o.fs-0.5}pt">${esc(h.nombre)}</span>`).join('')}</div></div>` : ''}
+    ${o.proyHTML ? `<div style="margin-bottom:${o.sp}px">${sectionTitleElegant('Proyectos Destacados',o.cp,o.fs,serif)}${state.proyectos.filter(pr=>pr.nombre).map(pr=>`<div style="margin-bottom:${o.sp*0.5}px;padding:8px 12px;border-left:3px solid ${o.cp};background:#fafafa"><div style="font-weight:700;color:${o.cp}">${esc(pr.nombre)}</div><div style="color:#4a5568;font-size:${o.fs-1}pt;margin-top:2px">${esc(pr.descripcion)}</div>${pr.tecnologias?`<div style="font-size:${o.fs-1.5}pt;color:${o.cs};margin-top:3px;font-style:italic">${esc(pr.tecnologias)}</div>`:''}</div>`).join('')}</div>` : ''}
+    ${o.idiomasHTML ? `<div style="margin-bottom:${o.sp}px;display:flex;gap:${o.sp}px;flex-wrap:wrap">${sectionTitleElegant('Idiomas',o.cp,o.fs,serif)}<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px">${state.idiomas.filter(id=>id.nombre).map(id=>`<span style="color:#4a5568;font-size:${o.fs-0.5}pt"><strong style="color:${o.cp}">${esc(id.nombre)}</strong> — ${esc(id.nivel)}</span>`).join('')}</div></div>` : ''}
+    ${o.certHTML ? `<div style="margin-bottom:${o.sp}px">${sectionTitleElegant('Certificaciones',o.cp,o.fs,serif)}${state.certificaciones.filter(ct=>ct.nombre).map(ct=>`<div style="color:#4a5568;font-size:${o.fs-0.5}pt;margin-bottom:3px"><strong style="color:${o.cp}">${esc(ct.nombre)}</strong> — ${esc(ct.institucion)} ${ct.fecha?'('+esc(ct.fecha)+')':''}</div>`).join('')}</div>` : ''}
+  </div>`;
+}
+
+/* ---- HELPERS DE SECCIONES ---- */
+function sectionTitle(text, cp, fs) {
+  return `<div style="font-size:${fs*1.1}pt;font-weight:700;color:${cp};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid ${cp}">${text}</div>`;
+}
+function sectionTitleElegant(text, cp, fs, serif) {
+  return `<div style="font-family:${serif};font-size:${fs*1.3}pt;font-weight:700;color:${cp};margin-bottom:10px;text-align:center">${text}</div>`;
+}
+
+function buildExperiencia(d, cp, cs, ff, fs, sp) {
+  const items = d.experiencia.filter(e => e.cargo || e.empresa);
+  return `<div style="margin-bottom:${sp}px">${sectionTitle('Experiencia Laboral',cp,fs)}${items.map(e => `
+    <div style="margin-bottom:${sp*0.6}px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <div><span style="font-size:${fs*1.1}pt;font-weight:700;color:${cp}">${esc(e.cargo)}</span><span style="color:${cs};font-size:${fs-0.5}pt;margin-left:6px">| ${esc(e.empresa)}</span></div>
+        <span style="font-size:${fs-1.5}pt;color:#999;white-space:nowrap">${esc(e.fechaInicio)} — ${esc(e.fechaFin)}</span>
+      </div>
+      ${e.descripcion ? `<div style="color:#4a5568;font-size:${fs-1}pt;margin-top:4px;line-height:1.5;white-space:pre-line">${esc(e.descripcion)}</div>` : ''}
+    </div>`).join('')}</div>`;
+}
+
+function buildEducacion(d, cp, cs, ff, fs, sp) {
+  const items = d.educacion.filter(e => e.titulo || e.institucion);
+  return `<div style="margin-bottom:${sp}px">${sectionTitle('Educación',cp,fs)}${items.map(e => `
+    <div style="margin-bottom:${sp*0.4}px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <div><span style="font-weight:700;color:${cp}">${esc(e.titulo)}</span><span style="color:${cs};font-size:${fs-0.5}pt;margin-left:6px">— ${esc(e.institucion)}</span></div>
+        <span style="font-size:${fs-1.5}pt;color:#999">${esc(e.fechaInicio)} — ${esc(e.fechaFin)}</span>
+      </div>
+      ${e.descripcion ? `<div style="color:#4a5568;font-size:${fs-1}pt;margin-top:2px">${esc(e.descripcion)}</div>` : ''}
+    </div>`).join('')}</div>`;
+}
+
+function buildHabilidades(d, cp, cs, ff, fs, sp) {
+  const items = d.habilidades.filter(h => h.nombre);
+  const cats = [...new Set(items.map(h => h.categoria))];
+  return cats.map(cat => {
+    const catItems = items.filter(h => h.categoria === cat);
+    return `<div style="margin-bottom:${sp*0.6}px"><div style="font-size:${fs-0.5}pt;font-weight:600;color:${cs};text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">${cat}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px">${catItems.map(h => `<span style="padding:3px 10px;background:${cp}11;color:${cp};border:1px solid ${cp}33;border-radius:4px;font-size:${fs-1}pt">${esc(h.nombre)}</span>`).join('')}</div></div>`;
+  }).join('');
+}
+
+function buildProyectos(d, cp, cs, ff, fs, sp) {
+  const items = d.proyectos.filter(pr => pr.nombre);
+  return `<div style="margin-bottom:${sp}px">${sectionTitle('Proyectos Destacados',cp,fs)}${items.map(pr => `
+    <div style="margin-bottom:${sp*0.5}px;padding:8px 10px;border-left:3px solid ${cp};background:#f8f9fa">
+      <div style="font-weight:700;color:${cp}">${esc(pr.nombre)}</div>
+      ${pr.descripcion ? `<div style="color:#4a5568;font-size:${fs-1}pt;margin-top:2px;line-height:1.5">${esc(pr.descripcion)}</div>` : ''}
+      ${pr.tecnologias ? `<div style="font-size:${fs-1.5}pt;color:${cs};margin-top:3px">${esc(pr.tecnologias)}</div>` : ''}
+    </div>`).join('')}</div>`;
+}
+
+function buildIdiomas(d, cp, cs, ff, fs, sp) {
+  const items = d.idiomas.filter(id => id.nombre);
+  return `<div style="margin-bottom:${sp*0.6}px"><div style="display:flex;flex-wrap:wrap;gap:4px 16px">${items.map(id => `<span style="font-size:${fs-0.5}pt;color:#4a5568"><strong style="color:${cp}">${esc(id.nombre)}</strong> — ${esc(id.nivel)}</span>`).join('')}</div></div>`;
+}
+
+function buildCertificaciones(d, cp, cs, ff, fs, sp) {
+  const items = d.certificaciones.filter(ct => ct.nombre);
+  return `<div style="margin-bottom:${sp}px">${sectionTitle('Certificaciones',cp,fs)}${items.map(ct => `
+    <div style="font-size:${fs-0.5}pt;color:#4a5568;margin-bottom:3px"><span style="color:${cp};font-weight:600">${esc(ct.nombre)}</span> — ${esc(ct.institucion)} ${ct.fecha?'('+esc(ct.fecha)+')':''}</div>`).join('')}</div>`;
+}
+
+/* ========================================================================
+   EXPORTACIÓN
+   ======================================================================== */
+let exportQuality = 2;
+function setExportQuality(q, btn) {
+  exportQuality = q;
+  ['q1','q2','q3'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style.borderColor = 'var(--border)';
+    el.style.color = 'var(--text)';
+  });
+  btn.style.borderColor = 'var(--accent)';
+  btn.style.color = 'var(--accent)';
+}
+
+async function exportAs(format) {
+  const prog = document.getElementById('exportProgress');
+  const bar = document.getElementById('exportBar');
+  const status = document.getElementById('exportStatus');
+  prog.classList.remove('hidden');
+  bar.style.width = '10%';
+  status.textContent = 'Preparando portafolio...';
+
+  try {
+    /* Renderizar a tamaño completo para captura */
+    const page = document.getElementById('portfolioPreview');
+    const origWidth = page.style.width;
+    page.style.width = '210mm';
+
+    await new Promise(r => setTimeout(r, 200));
+    bar.style.width = '30%';
+    status.textContent = 'Generando imagen...';
+
+    const canvas = await html2canvas(page, {
+      scale: exportQuality,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false
+    });
+
+    bar.style.width = '70%';
+    status.textContent = 'Creando archivo...';
+
+    const link = document.createElement('a');
+    const fileName = (state.personal.nombre || 'portafolio').toLowerCase().replace(/\s+/g, '-') + '-' + state.config.plantilla;
+
+    if (format === 'png') {
+      link.download = fileName + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } else if (format === 'jpg') {
+      link.download = fileName + '.jpg';
+      link.href = canvas.toDataURL('image/jpeg', 0.92);
+      link.click();
+    } else if (format === 'pdf') {
+      const { jsPDF } = window.jspdf;
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      let heightLeft = imgHeight;
+      let position = 0;
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= 297;
+      while (heightLeft > 0) {
+        position = -297;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= 297;
+      }
+      pdf.save(fileName + '.pdf');
+    }
+
+    page.style.width = origWidth;
+    bar.style.width = '100%';
+    status.textContent = 'Completado';
+    showToast('Archivo ' + format.toUpperCase() + ' exportado correctamente', 'success');
+    setTimeout(closeExportModal, 800);
+  } catch(err) {
+    status.textContent = 'Error: ' + err.message;
+    showToast('Error al exportar: ' + err.message, 'error');
+  }
+}
+
+/* ========================================================================
+   GUARDAR / CARGAR LOCAL
+   ======================================================================== */
+function saveToLocal() {
+  localStorage.setItem('portfolioforge_data', JSON.stringify(state));
+  showToast('Datos guardados en localStorage', 'success');
+}
+function loadFromLocal() {
+  const saved = localStorage.getItem('portfolioforge_data');
+  if (!saved) { showToast('No hay datos guardados', 'error'); return; }
+  try {
+    const parsed = JSON.parse(saved);
+    Object.assign(state, parsed);
+    syncUIFromState();
+    renderPreview();
+    updateScore();
+    showToast('Datos restaurados correctamente', 'success');
+  } catch(e) { showToast('Error al restaurar datos', 'error'); }
+}
+function syncUIFromState() {
+  /* Sync simple fields */
+  document.querySelectorAll('.input-field[data-field]').forEach(el => {
+    const val = getNestedValue(state, el.dataset.field);
+    if (val !== undefined) el.value = val;
+  });
+  document.querySelectorAll('.toggle-switch input[data-field]').forEach(el => {
+    const val = getNestedValue(state, el.dataset.field);
+    if (val !== undefined) el.checked = val;
+  });
+  /* Sync foto */
+  if (state.personal.fotoUrl) {
+    document.getElementById('photoImg').src = state.personal.fotoUrl;
+    document.getElementById('photoImg').classList.remove('hidden');
+    document.getElementById('photoIcon').classList.add('hidden');
+  }
+  /* Sync config */
+  document.getElementById('currentTemplateName').textContent = templateNames[state.config.plantilla];
+  document.getElementById('colorPrimarioVal').textContent = state.config.colorPrimario;
+  document.getElementById('colorSecundarioVal').textContent = state.config.colorSecundario;
+  document.getElementById('fontSizeSlider').value = state.config.fontSize;
+  document.getElementById('fontSizeVal').textContent = state.config.fontSize + 'pt';
+  document.getElementById('spacingSlider').value = state.config.spacing;
+  document.getElementById('spacingVal').textContent = state.config.spacing + 'px';
+  /* Re-render arrays */
+  renderExperiencia();
+  renderEducacion();
+  renderHabilidades();
+  renderProyectos();
+  renderIdiomas();
+  renderCertificaciones();
+  /* Update template grid */
+  document.querySelectorAll('.template-card').forEach((c,i) => {
+    const templates = ['minimal','corporativo','creativo','tecnico','elegante'];
+    c.classList.toggle('active', templates[i] === state.config.plantilla);
+  });
+}
+function getNestedValue(obj, path) {
+  const keys = path.split('.');
+  let cur = obj;
+  for (const k of keys) { if (cur[k] === undefined) return undefined; cur = cur[k]; }
+  return cur;
+}
+
+/* ========================================================================
+   DATOS DE EJEMPLO
+   ======================================================================== */
+function loadDemoData() {
+  state.personal = {
+    nombre: 'Alejandro', apellido: 'Morales', titulo: 'Ingeniero de Software Senior',
+    email: 'alejandro.morales@email.com', telefono: '+52 55 1234 5678',
+    ubicacion: 'Ciudad de México, México', linkedin: 'linkedin.com/in/alejandro-morales',
+    github: 'github.com/alejandro-dev', sitioWeb: 'alejandromorales.dev',
+    resumen: 'Ingeniero de software con más de 8 años de experiencia en el diseño y desarrollo de aplicaciones web escalables. Especializado en arquitecturas de microservicios, cloud computing y liderazgo técnico de equipos ágiles. Apasionado por construir productos que impactan positivamente en millones de usuarios.',
+    fotoUrl: 'https://picsum.photos/seed/portfolio42/400/400.jpg'
+  };
+  state.experiencia = [
+    { empresa: 'TechCorp Global', cargo: 'Lead Software Engineer', fechaInicio: 'Ene 2021', fechaFin: 'Presente', actual: true, descripcion: 'Liderazgo técnico de un equipo de 12 desarrolladores.\nDiseño e implementación de arquitectura de microservicios en AWS.\nReducción del tiempo de respuesta del API en un 60%.\nImplementación de CI/CD pipelines con GitHub Actions.' },
+    { empresa: 'InnovateLab', cargo: 'Senior Full-Stack Developer', fechaInicio: 'Mar 2018', fechaFin: 'Dic 2020', actual: false, descripcion: 'Desarrollo de plataforma SaaS con React y Node.js.\nMigración de monolito a microservicios.\nMentoría de desarrolladores junior.\nIntegración de sistemas de pago y análisis de datos.' },
+    { empresa: 'StartupXYZ', cargo: 'Frontend Developer', fechaInicio: 'Jun 2016', fechaFin: 'Feb 2018', actual: false, descripcion: 'Desarrollo de interfaces con React y Angular.\nOptimización de rendimiento web (Core Web Vitals).\nImplementación de diseño responsivo y accesible.' }
+  ];
+  state.educacion = [
+    { institucion: 'Universidad Nacional Autónoma de México', titulo: 'Ingeniería en Sistemas Computacionales', fechaInicio: '2011', fechaFin: '2016', descripcion: 'Graduado con honores. Tesis sobre optimización de algoritmos de búsqueda distribuidos.' }
+  ];
+  state.habilidades = [
+    { nombre: 'TypeScript', nivel: 95, categoria: 'Lenguaje' },
+    { nombre: 'React / Next.js', nivel: 92, categoria: 'Framework' },
+    { nombre: 'Node.js', nivel: 90, categoria: 'Framework' },
+    { nombre: 'Python', nivel: 85, categoria: 'Lenguaje' },
+    { nombre: 'AWS', nivel: 88, categoria: 'Herramienta' },
+    { nombre: 'Docker / Kubernetes', nivel: 82, categoria: 'Herramienta' },
+    { nombre: 'PostgreSQL', nivel: 87, categoria: 'Técnica' },
+    { nombre: 'GraphQL', nivel: 80, categoria: 'Técnica' },
+    { nombre: 'Liderazgo', nivel: 90, categoria: 'Blanda' },
+    { nombre: 'Comunicación', nivel: 88, categoria: 'Blanda' }
+  ];
+  state.proyectos = [
+    { nombre: 'Plataforma de Análisis de Datos', descripcion: 'Sistema de dashboards interactivos para análisis de datos en tiempo real con visualizaciones avanzadas.', tecnologias: 'React, D3.js, Node.js, PostgreSQL, Redis', enlace: 'github.com/alejandro-dev/data-platform' },
+    { nombre: 'App de Gestión de Proyectos', descripcion: 'Aplicación de gestión de proyectos ágiles con tableros Kanban, seguimiento de sprints y reportes automatizados.', tecnologias: 'Next.js, TypeScript, Prisma, AWS Lambda', enlace: 'github.com/alejandro-dev/project-manager' }
+  ];
+  state.idiomas = [
+    { nombre: 'Español', nivel: 'Nativo' },
+    { nombre: 'Inglés', nivel: 'Avanzado' },
+    { nombre: 'Portugués', nivel: 'Intermedio' }
+  ];
+  state.certificaciones = [
+    { nombre: 'AWS Solutions Architect Professional', institucion: 'Amazon Web Services', fecha: '2023' },
+    { nombre: 'Google Cloud Professional Developer', institucion: 'Google Cloud', fecha: '2022' }
+  ];
+
+  /* Sync foto */
+  document.getElementById('photoImg').src = state.personal.fotoUrl;
+  document.getElementById('photoImg').classList.remove('hidden');
+  document.getElementById('photoIcon').classList.add('hidden');
+
+  syncUIFromState();
+  renderPreview();
+  updateScore();
+  showToast('Datos de ejemplo cargados', 'success');
+}
+
+/* ========================================================================
+   UTILIDADES
+   ======================================================================== */
+function esc(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg, type = 'success') {
+  const toast = document.getElementById('toast');
+  const icon = document.getElementById('toastIcon');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.className = 'toast ' + type;
+  icon.className = type === 'success' ? 'fa-solid fa-check-circle text-[var(--accent)]' : 'fa-solid fa-exclamation-circle text-[var(--danger)]';
+  setTimeout(() => toast.classList.add('show'), 10);
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+/* Cerrar modales al clic fuera */
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.remove('show');
+  });
+});
+</script>
+</body>
+</html>
