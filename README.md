@@ -1,5 +1,4 @@
 ```markdown
-<div align="center">
 
 # PortfolioForge
 
@@ -232,11 +231,8 @@ MIT — Úsalo, modíficalo, distribúyelo, véndelo si quieres. No hay cadenas.
 
 ---
 
-<div align="center">
 
 **Un archivo. Cinco plantillas. Cero excusas.**
 
 Hecho para que pases menos tiempo formateando y más tiempo consiguiendo el trabajo que mereces.
 
-</div>
-```
