@@ -1,4 +1,4 @@
-```
+
 <div align="center">
 
 # PortfolioForge
@@ -239,4 +239,3 @@ MIT — Úsalo, modíficalo, distribúyelo, véndelo si quieres. No hay cadenas.
 Hecho para que pases menos tiempo formateando y más tiempo consiguiendo el trabajo que mereces.
 
 </div>
-```
